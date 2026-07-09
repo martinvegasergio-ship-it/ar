@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Las Monedas del Imperio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stone:#EDE4D2;
+    --stone-dark:#D8C7A2;
+    --parchment:#F6EFDD;
+    --terracotta:#B5502F;
+    --terracotta-dark:#8B3A20;
+    --ink:#2E2418;
+    --ink-soft:#5B4C38;
+    --marble-blue:#1F3C56;
+    --gold:#B8892B;
+    --gold-light:#E7C877;
+    --bronze:#8C7247;
+    --success:#4C6B3F;
+    --error:#8E2A2A;
+    --radius-lg:22px;
+    --radius-md:14px;
+  }
+
+  *{box-sizing:border-box;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Crimson Pro', serif;
+    color:var(--ink);
+    background:
+      radial-gradient(ellipse at top left, rgba(184,137,43,0.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(181,80,47,0.10), transparent 55%),
+      var(--stone);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:28px 16px 60px;
+  }
+
+  .stage{
+    width:100%;
+    max-width:760px;
+  }
+
+  /* ---------- Header / coin rack ---------- */
+  .rack-wrap{
+    background:var(--parchment);
+    border:1px solid var(--stone-dark);
+    border-radius:var(--radius-lg);
+    padding:16px 18px;
+    margin-bottom:18px;
+    box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 22px -14px rgba(46,36,24,0.35);
+  }
+  .rack-title{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:10px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .rack-title h1{
+    font-family:'Cinzel', serif;
+    font-size:15px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--marble-blue);
+    margin:0;
+  }
+  .rack-score{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:13px;
+    color:var(--terracotta-dark);
+    background:rgba(181,80,47,0.10);
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  .rack{
+    display:grid;
+    grid-template-columns:repeat(8, 1fr);
+    gap:8px;
+  }
+  .slot{
+    aspect-ratio:1;
+    border-radius:50%;
+    border:2px dashed var(--stone-dark);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:repeating-conic-gradient(var(--stone) 0% 25%, var(--parchment) 0% 50%);
+    background-size:6px 6px;
+    position:relative;
+    overflow:hidden;
+  }
+  .slot svg{width:100%;height:100%;display:block;}
+  .slot.filled{
+    border-style:solid;
+    border-color:var(--gold);
+    animation:mint 480ms ease;
+  }
+  .slot.filled.wrong{border-color:var(--error);}
+  .slot.current{border-color:var(--terracotta); box-shadow:0 0 0 3px rgba(181,80,47,0.15);}
+  @keyframes mint{
+    0%{transform:scale(0.5) rotate(-25deg); opacity:0;}
+    60%{transform:scale(1.12) rotate(6deg); opacity:1;}
+    100%{transform:scale(1) rotate(0deg); opacity:1;}
+  }
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:var(--parchment);
+    border:1px solid var(--stone-dark);
+    border-radius:var(--radius-lg);
+    box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 14px 34px -18px rgba(46,36,24,0.45);
+    overflow:hidden;
+  }
+
+  /* ---------- Intro screen ---------- */
+  .intro{padding:38px 30px 34px; text-align:center;}
+  .intro .eyebrow{
+    font-family:'Cinzel',serif;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--terracotta);
+    margin-bottom:10px;
+  }
+  .intro h1{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:clamp(28px,5.5vw,42px);
+    line-height:1.15;
+    margin:0 0 14px;
+    color:var(--marble-blue);
+  }
+  .intro h1 em{
+    font-style:normal;
+    color:var(--terracotta);
+  }
+  .intro p.lead{
+    max-width:520px;
+    margin:0 auto 26px;
+    font-size:17px;
+    line-height:1.55;
+    color:var(--ink-soft);
+  }
+  .intro-coin{
+    width:120px;height:120px;margin:0 auto 22px;
+  }
+  .rules{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin:0 0 30px;
+    text-align:left;
+  }
+  .rule-card{
+    background:var(--stone);
+    border:1px solid var(--stone-dark);
+    border-radius:var(--radius-md);
+    padding:12px 16px;
+    width:200px;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .rule-card b{
+    display:block;
+    font-family:'Cinzel',serif;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--marble-blue);
+    margin-bottom:4px;
+  }
+
+  button.cta{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-size:14px;
+    color:var(--parchment);
+    background:linear-gradient(180deg, var(--terracotta), var(--terracotta-dark));
+    border:none;
+    border-radius:999px;
+    padding:14px 34px;
+    cursor:pointer;
+    box-shadow:0 8px 18px -8px rgba(139,58,32,0.6);
+    transition:transform 140ms ease, box-shadow 140ms ease;
+  }
+  button.cta:hover{transform:translateY(-2px); box-shadow:0 12px 22px -8px rgba(139,58,32,0.65);}
+  button.cta:active{transform:translateY(0);}
+  button.cta:focus-visible, .opt:focus-visible, .again-link:focus-visible{
+    outline:3px solid var(--marble-blue);
+    outline-offset:2px;
+  }
+  button.cta.ghost{
+    background:transparent;
+    color:var(--terracotta-dark);
+    border:2px solid var(--terracotta-dark);
+    box-shadow:none;
+  }
+
+  /* ---------- Round screen ---------- */
+  .round{padding:26px 26px 28px; display:none;}
+  .round.active{display:block; animation:fadein 260ms ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  .round-top{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .round-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    font-weight:700;
+    color:var(--marble-blue);
+    background:rgba(31,60,86,0.08);
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  .round-tag.bonus{
+    color:var(--gold);
+    background:rgba(184,137,43,0.14);
+  }
+
+  .round-body{
+    display:grid;
+    grid-template-columns:170px 1fr;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:560px){
+    .round-body{grid-template-columns:1fr; justify-items:center; text-align:center;}
+  }
+
+  .medallion{
+    width:150px;height:150px;
+    filter:drop-shadow(0 10px 16px rgba(46,36,24,0.25));
+  }
+
+  .question h2{
+    font-family:'Cinzel', serif;
+    font-size:clamp(18px,3vw,22px);
+    line-height:1.35;
+    color:var(--marble-blue);
+    margin:0 0 16px;
+  }
+
+  .options{
+    display:grid;
+    gap:10px;
+  }
+  .opt{
+    text-align:left;
+    font-family:'Crimson Pro', serif;
+    font-size:16px;
+    color:var(--ink);
+    background:var(--stone);
+    border:1.5px solid var(--stone-dark);
+    border-radius:var(--radius-md);
+    padding:12px 16px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:background 140ms ease, border-color 140ms ease, transform 100ms ease;
+  }
+  .opt:hover:not(:disabled){
+    border-color:var(--terracotta);
+    transform:translateX(2px);
+  }
+  .opt:disabled{cursor:default;}
+  .opt .letter{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:12px;
+    width:22px;height:22px;
+    border-radius:50%;
+    background:var(--parchment);
+    border:1px solid var(--stone-dark);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .opt.correct{
+    background:rgba(76,107,63,0.14);
+    border-color:var(--success);
+  }
+  .opt.correct .letter{background:var(--success); color:#fff; border-color:var(--success);}
+  .opt.wrong{
+    background:rgba(142,42,42,0.10);
+    border-color:var(--error);
+  }
+  .opt.wrong .letter{background:var(--error); color:#fff; border-color:var(--error);}
+
+  .fact{
+    margin-top:18px;
+    padding:14px 16px;
+    border-radius:var(--radius-md);
+    background:var(--stone);
+    border-left:4px solid var(--gold);
+    font-size:15px;
+    line-height:1.5;
+    color:var(--ink-soft);
+    display:none;
+  }
+  .fact.show{display:block; animation:fadein 220ms ease;}
+  .fact b{color:var(--marble-blue);}
+
+  .round-footer{
+    margin-top:20px;
+    display:flex;
+    justify-content:flex-end;
+  }
+
+  /* ---------- End screen ---------- */
+  .end{padding:36px 30px 32px; text-align:center; display:none;}
+  .end.active{display:block; animation:fadein 300ms ease;}
+  .end .grade-coin{width:130px;height:130px;margin:0 auto 16px;}
+  .end h2{
+    font-family:'Cinzel',serif;
+    font-size:26px;
+    color:var(--marble-blue);
+    margin:0 0 6px;
+  }
+  .end .grade-latin{
+    font-family:'Cinzel',serif;
+    letter-spacing:0.1em;
+    color:var(--terracotta);
+    text-transform:uppercase;
+    font-size:13px;
+    margin-bottom:18px;
+  }
+  .end .score-big{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:38px;
+    color:var(--ink);
+    margin-bottom:22px;
+  }
+  .review{
+    text-align:left;
+    display:grid;
+    gap:8px;
+    margin:0 0 28px;
+  }
+  .review-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--stone);
+    border-radius:10px;
+    padding:8px 12px;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .review-item .mark{
+    font-weight:700;
+    width:18px;
+    flex-shrink:0;
+  }
+  .review-item.ok .mark{color:var(--success);}
+  .review-item.bad .mark{color:var(--error);}
+  .review-item b{color:var(--ink);}
+
+  footer.credit{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    opacity:0.6;
+    margin-top:18px;
+    letter-spacing:0.04em;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="rack-wrap">
+    <div class="rack-title">
+      <h1>Las Monedas del Imperio</h1>
+      <span class="rack-score" id="scoreLabel">0 / 8 acuñadas</span>
+    </div>
+    <div class="rack" id="rack"></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="panel intro" id="introScreen">
+    <div class="intro-coin" id="introCoin"></div>
+    <div class="eyebrow">Latina Lingua · 4º ESO</div>
+    <h1>Construye tu <em>imperio</em><br>de conocimiento</h1>
+    <p class="lead">Un arquitecto romano necesita un aprendiz que reconozca sus edificios. Responde bien y acuñarás una moneda por cada construcción. Al final descubrirás qué tipo de ciudadano romano serías.</p>
+    <div class="rules">
+      <div class="rule-card"><b>Cómo se juega</b>Observa la moneda, lee la pregunta y elige una respuesta.</div>
+      <div class="rule-card"><b>8 monedas</b>7 edificios romanos y 1 ronda trampa para expertos.</div>
+      <div class="rule-card"><b>Sin prisa</b>No hay tiempo límite: piensa como un buen arquitecto.</div>
+    </div>
+    <button class="cta" id="startBtn">Comenzar la obra</button>
+  </div>
+
+  <!-- ROUNDS -->
+  <div class="panel" id="roundsPanel" style="display:none;">
+    <div id="roundsContainer"></div>
+  </div>
+
+  <!-- END -->
+  <div class="panel end" id="endScreen">
+    <div class="grade-coin" id="gradeCoin"></div>
+    <div class="grade-latin" id="gradeLatin"></div>
+    <h2 id="gradeTitle"></h2>
+    <div class="score-big" id="finalScore"></div>
+    <div class="review" id="reviewList"></div>
+    <button class="cta ghost" id="retryBtn">Reconstruir de nuevo</button>
+  </div>
+
+  <footer class="credit">Material para el aula de Latín · construcciones de la Antigua Roma</footer>
+</div>
+
+<script>
+(function(){
+
+/* ============ ICONOGRAPHY ============
+   Coin medallion generator: bronze/gold disc + laurel-dot rim + custom silhouette.
+   The "agora" coin uses a squared meander rim instead of the laurel dots,
+   as a visual hint that it does not belong to the Roman set.
+=======================================*/
+
+function coinBase(innerSVG, opts){
+  opts = opts || {};
+  var rimColor = opts.greekRim ? '#7A6A46' : '#B8892B';
+  var faceGrad = opts.greekRim ? 'greekFace' : 'romanFace';
+  var rim = '';
+  if(opts.greekRim){
+    // simple meander (greek key) tick rim
+    var ticks = '';
+    for(var i=0;i<24;i++){
+      var ang = (i/24)*Math.PI*2;
+      var x1 = 100 + Math.cos(ang)*92, y1 = 100 + Math.sin(ang)*92;
+      var x2 = 100 + Math.cos(ang)*84, y2 = 100 + Math.sin(ang)*84;
+      ticks += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+rimColor+'" stroke-width="3"/>';
+    }
+    rim = ticks;
+  } else {
+    var dots = '';
+    for(var j=0;j<28;j++){
+      var a = (j/28)*Math.PI*2;
+      var dx = 100 + Math.cos(a)*90, dy = 100 + Math.sin(a)*90;
+      dots += '<circle cx="'+dx+'" cy="'+dy+'" r="2.6" fill="'+rimColor+'"/>';
+    }
+    rim = dots;
+  }
+  return '<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">'+
+    '<defs>'+
+      '<radialGradient id="romanFace" cx="35%" cy="30%" r="75%">'+
+        '<stop offset="0%" stop-color="#F3DE9C"/>'+
+        '<stop offset="55%" stop-color="#D9AE4E"/>'+
+        '<stop offset="100%" stop-color="#9C7327"/>'+
+      '</radialGradient>'+
+      '<radialGradient id="greekFace" cx="35%" cy="30%" r="75%">'+
+        '<stop offset="0%" stop-color="#DCD3BC"/>'+
+        '<stop offset="55%" stop-color="#B7AC8C"/>'+
+        '<stop offset="100%" stop-color="#7C7259"/>'+
+      '</radialGradient>'+
+    '</defs>'+
+    '<circle cx="100" cy="100" r="96" fill="url(#'+faceGrad+')" stroke="#5B4522" stroke-width="2"/>'+
+    '<circle cx="100" cy="100" r="78" fill="none" stroke="'+rimColor+'" stroke-width="1.5" opacity="0.6"/>'+
+    rim+
+    innerSVG+
+  '</svg>';
+}
+
+var ICONS = {
+  anfiteatro: coinBase(
+    '<g>'+
+      '<ellipse cx="100" cy="112" rx="58" ry="38" fill="#8B3A20"/>'+
+      '<ellipse cx="100" cy="106" rx="58" ry="38" fill="#B5502F"/>'+
+      '<ellipse cx="100" cy="106" rx="34" ry="20" fill="#EDE4D2"/>'+
+      '<g stroke="#8B3A20" stroke-width="3" opacity="0.85">'+
+        '<path d="M46 100 a54 34 0 0 1 108 0" fill="none"/>'+
+      '</g>'+
+      '<g fill="#8B3A20" opacity="0.9">'+
+        '<rect x="50" y="90" width="7" height="16" rx="3"/>'+
+        '<rect x="66" y="82" width="7" height="16" rx="3"/>'+
+        '<rect x="83" y="78" width="7" height="16" rx="3"/>'+
+        '<rect x="110" y="78" width="7" height="16" rx="3"/>'+
+        '<rect x="127" y="82" width="7" height="16" rx="3"/>'+
+        '<rect x="143" y="90" width="7" height="16" rx="3"/>'+
+      '</g>'+
+    '</g>'
+  ),
+  teatro: coinBase(
+    '<g>'+
+      '<path d="M40 130 a60 45 0 0 1 120 0 Z" fill="#B5502F"/>'+
+      '<path d="M52 130 a48 36 0 0 1 96 0 Z" fill="#D9AE4E" opacity="0.35"/>'+
+      '<path d="M64 130 a36 27 0 0 1 72 0 Z" fill="#D9AE4E" opacity="0.55"/>'+
+      '<rect x="72" y="118" width="56" height="14" rx="2" fill="#8B3A20"/>'+
+      '<path d="M85 88 q7 -16 15 0 q7 -16 15 0 q3 10 -4 16 h-22 q-7 -6 -4 -16z" fill="#EDE4D2" stroke="#8B3A20" stroke-width="2.5"/>'+
+      '<circle cx="93" cy="98" r="2.4" fill="#8B3A20"/>'+
+      '<circle cx="107" cy="98" r="2.4" fill="#8B3A20"/>'+
+      '<path d="M93 105 q7 5 14 0" stroke="#8B3A20" stroke-width="2" fill="none"/>'+
+    '</g>'
+  ),
+  domus: coinBase(
+    '<g>'+
+      '<polygon points="100,58 150,96 50,96" fill="#8B3A20"/>'+
+      '<rect x="58" y="96" width="84" height="46" fill="#B5502F"/>'+
+      '<rect x="86" y="104" width="28" height="20" fill="#1F3C56"/>'+
+      '<rect x="90" y="108" width="20" height="12" fill="#5B86A6"/>'+
+      '<rect x="66" y="112" width="12" height="30" fill="#8B3A20"/>'+
+      '<rect x="122" y="112" width="12" height="30" fill="#8B3A20"/>'+
+    '</g>'
+  ),
+  acueducto: coinBase(
+    '<g>'+
+      '<rect x="40" y="122" width="120" height="10" fill="#8B3A20"/>'+
+      '<g fill="none" stroke="#B5502F" stroke-width="9">'+
+        '<path d="M52 122 v-18 a14 14 0 0 1 28 0 v18" />'+
+        '<path d="M92 122 v-18 a14 14 0 0 1 28 0 v18" />'+
+        '<path d="M132 122 v-18 a14 14 0 0 1 16 0 v18" />'+
+      '</g>'+
+      '<rect x="40" y="112" width="120" height="8" fill="#D9AE4E"/>'+
+    '</g>'
+  ),
+  circo: coinBase(
+    '<g>'+
+      '<ellipse cx="100" cy="106" rx="60" ry="30" fill="none" stroke="#B5502F" stroke-width="7"/>'+
+      '<rect x="97" y="88" width="6" height="36" fill="#D9AE4E"/>'+
+      '<circle cx="100" cy="86" r="4" fill="#D9AE4E"/>'+
+      '<circle cx="66" cy="112" r="5" fill="#8B3A20"/>'+
+      '<circle cx="76" cy="118" r="5" fill="#8B3A20"/>'+
+      '<path d="M60 116 l14 -6 3 4 -12 8z" fill="#8B3A20"/>'+
+    '</g>'
+  ),
+  foro: coinBase(
+    '<g>'+
+      '<polygon points="100,60 146,92 54,92" fill="#8B3A20"/>'+
+      '<rect x="54" y="92" width="92" height="8" fill="#D9AE4E"/>'+
+      '<g fill="#B5502F">'+
+        '<rect x="60" y="100" width="8" height="34"/>'+
+        '<rect x="78" y="100" width="8" height="34"/>'+
+        '<rect x="96" y="100" width="8" height="34"/>'+
+        '<rect x="114" y="100" width="8" height="34"/>'+
+        '<rect x="132" y="100" width="8" height="34"/>'+
+      '</g>'+
+      '<rect x="54" y="134" width="92" height="8" fill="#8B3A20"/>'+
+    '</g>'
+  ),
+  termas: coinBase(
+    '<g>'+
+      '<path d="M50 128 a50 40 0 0 1 100 0 z" fill="#B5502F"/>'+
+      '<rect x="50" y="126" width="100" height="10" fill="#8B3A20"/>'+
+      '<path d="M78 92 q-6 10 0 16 q6 6 0 14" stroke="#EDE4D2" stroke-width="4" fill="none" stroke-linecap="round"/>'+
+      '<path d="M100 86 q-6 10 0 16 q6 6 0 14" stroke="#EDE4D2" stroke-width="4" fill="none" stroke-linecap="round"/>'+
+      '<path d="M122 92 q-6 10 0 16 q6 6 0 14" stroke="#EDE4D2" stroke-width="4" fill="none" stroke-linecap="round"/>'+
+    '</g>'
+  ),
+  agora: coinBase(
+    '<g>'+
+      '<rect x="55" y="98" width="90" height="8" fill="#7C7259"/>'+
+      '<g fill="#B7AC8C">'+
+        '<rect x="60" y="106" width="7" height="30"/>'+
+        '<rect x="78" y="106" width="7" height="30"/>'+
+        '<rect x="96" y="106" width="7" height="30"/>'+
+        '<rect x="114" y="106" width="7" height="30"/>'+
+        '<rect x="132" y="106" width="7" height="30"/>'+
+      '</g>'+
+      '<rect x="55" y="136" width="90" height="7" fill="#7C7259"/>'+
+    '</g>',
+    {greekRim:true}
+  )
+};
+
+/* ============ GAME DATA ============ */
+
+var ROUNDS = [
+  {
+    key:'anfiteatro',
+    mode:'name',
+    prompt:'¿Qué construcción romana es esta?',
+    options:['Anfiteatro','Circo','Termas','Teatro'],
+    correct:0,
+    fact:'<b>Anfiteatro:</b> edificio ovalado, como el Coliseo de Roma, donde se celebraban combates de gladiadores y cacerías de animales (<i>venationes</i>) ante miles de espectadores.'
+  },
+  {
+    key:'teatro',
+    mode:'function',
+    prompt:'¿Para qué se usaba principalmente este edificio?',
+    options:['Carreras de cuadrigas','Representaciones de comedias y tragedias','Baños públicos','Reuniones del Senado'],
+    correct:1,
+    fact:'<b>Teatro:</b> tenía forma de semicírculo y acogía obras como las comedias de Plauto. Los actores llevaban máscaras, como la que corona esta moneda.'
+  },
+  {
+    key:'domus',
+    mode:'name',
+    prompt:'Vivienda de una familia romana acomodada, organizada en torno a un patio central (atrio) con una abertura en el techo. ¿Cómo se llama?',
+    options:['Insula','Domus','Basílica','Termas'],
+    correct:1,
+    fact:'<b>Domus:</b> la casa unifamiliar romana. El hueco del tejado (<i>compluvium</i>) dejaba caer la lluvia en una piscina poco profunda, el <i>impluvium</i>, que ves en el centro de la moneda.'
+  },
+  {
+    key:'acueducto',
+    mode:'function',
+    prompt:'¿Cuál era la función de esta construcción de arcos?',
+    options:['Defender la ciudad','Transportar agua hasta las ciudades','Guardar el grano','Celebrar procesiones religiosas'],
+    correct:1,
+    fact:'<b>Acueducto:</b> canalizaba agua desde manantiales lejanos hasta las ciudades, aprovechando una ligerísima pendiente. Sus arcos son una de las obras de ingeniería más admiradas de Roma.'
+  },
+  {
+    key:'circo',
+    mode:'name',
+    prompt:'Recinto alargado con una línea central (la <i>spina</i>) donde se disputaban carreras de cuadrigas. ¿Qué edificio es?',
+    options:['Foro','Anfiteatro','Circo','Ágora'],
+    correct:2,
+    fact:'<b>Circo:</b> el Circo Máximo de Roma podía albergar a más de 150.000 espectadores que animaban a los aurigas en sus vueltas alrededor de la <i>spina</i>.'
+  },
+  {
+    key:'foro',
+    mode:'function',
+    prompt:'Rodeado de templos y columnas, ¿qué función cumplía este espacio en una ciudad romana?',
+    options:['Era el centro político, religioso y comercial de la ciudad','Era el cementerio de la ciudad','Servía solo para el ocio infantil','Era la residencia del emperador'],
+    correct:0,
+    fact:'<b>Foro:</b> plaza pública donde se hacían negocios, se impartía justicia y se celebraban ceremonias religiosas. El Foro Romano era el corazón de toda la ciudad.'
+  },
+  {
+    key:'termas',
+    mode:'name',
+    prompt:'Complejo con piscinas de agua fría, templada y caliente, además de gimnasio y salas de lectura. ¿Cómo se llama?',
+    options:['Termas','Domus','Circo','Teatro'],
+    correct:0,
+    fact:'<b>Termas:</b> los baños públicos eran también un lugar de encuentro social, con salas <i>frigidarium</i> (fría), <i>tepidarium</i> (templada) y <i>caldarium</i> (caliente).'
+  },
+  {
+    key:'agora',
+    mode:'trick',
+    prompt:'Ronda trampa: una de estas cuatro construcciones NO es romana, sino griega. ¿Cuál es el intruso?',
+    options:['Domus','Ágora','Anfiteatro','Termas'],
+    correct:1,
+    fact:'<b>¡Bien visto!</b> El ágora era la plaza pública de las ciudades griegas, equivalente al foro romano. Roma heredó muchas ideas de Grecia, pero el ágora pertenece a otra civilización: por eso su moneda tiene un borde distinto, con greca en lugar de laurel.'
+  }
+];
+
+/* ============ STATE ============ */
+
+var state = {
+  index:0,
+  answers: [] // {correct:bool}
+};
+
+/* ============ RENDER: rack ============ */
+
+var rackEl = document.getElementById('rack');
+var scoreLabel = document.getElementById('scoreLabel');
+
+function renderRack(){
+  rackEl.innerHTML = '';
+  ROUNDS.forEach(function(r, i){
+    var slot = document.createElement('div');
+    slot.className = 'slot';
+    var answer = state.answers[i];
+    if(answer){
+      slot.classList.add('filled');
+      if(!answer.correct) slot.classList.add('wrong');
+      slot.innerHTML = ICONS[r.key];
+    } else if(i === state.index){
+      slot.classList.add('current');
+      slot.innerHTML = '<span style="font-family:JetBrains Mono, monospace; font-size:11px; color:#8C7247;">?</span>';
+    }
+    rackEl.appendChild(slot);
+  });
+  var correctCount = state.answers.filter(function(a){return a.correct;}).length;
+  scoreLabel.textContent = correctCount + ' / ' + ROUNDS.length + ' acuñadas';
+}
+
+/* ============ RENDER: intro coin ============ */
+document.getElementById('introCoin').innerHTML = coinBase(
+  '<g>'+
+    '<circle cx="100" cy="100" r="34" fill="#8B3A20"/>'+
+    '<text x="100" y="108" font-family="Cinzel, serif" font-size="30" font-weight="700" fill="#F3DE9C" text-anchor="middle">R</text>'+
+  '</g>'
+);
+
+/* ============ ROUNDS ============ */
+
+var roundsContainer = document.getElementById('roundsContainer');
+var roundsPanel = document.getElementById('roundsPanel');
+var introScreen = document.getElementById('introScreen');
+var endScreen = document.getElementById('endScreen');
+
+function buildRoundDOM(round, idx){
+  var wrap = document.createElement('div');
+  wrap.className = 'round';
+  wrap.id = 'round-' + idx;
+
+  var tagLabel = round.mode === 'trick' ? 'Ronda bonus' : ('Ronda ' + (idx+1) + ' de ' + ROUNDS.length);
+  var tagClass = round.mode === 'trick' ? 'round-tag bonus' : 'round-tag';
+
+  wrap.innerHTML =
+    '<div class="round-top"><span class="'+tagClass+'">'+tagLabel+'</span></div>'+
+    '<div class="round-body">'+
+      '<div class="medallion">'+ICONS[round.key]+'</div>'+
+      '<div class="question">'+
+        '<h2>'+round.prompt+'</h2>'+
+        '<div class="options" id="opts-'+idx+'"></div>'+
+        '<div class="fact" id="fact-'+idx+'"></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="round-footer"><button class="cta" id="next-'+idx+'" style="display:none;">Siguiente ›</button></div>';
+
+  roundsContainer.appendChild(wrap);
+
+  var optsEl = wrap.querySelector('#opts-'+idx);
+  var letters = ['A','B','C','D'];
+  round.options.forEach(function(optText, oi){
+    var b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = '<span class="letter">'+letters[oi]+'</span><span>'+optText+'</span>';
+    b.addEventListener('click', function(){ answerRound(idx, oi); });
+    optsEl.appendChild(b);
+  });
+}
+
+ROUNDS.forEach(buildRoundDOM);
+
+function showRound(idx){
+  document.querySelectorAll('.round').forEach(function(el){ el.classList.remove('active'); });
+  var el = document.getElementById('round-' + idx);
+  if(el) el.classList.add('active');
+  renderRack();
+}
+
+function answerRound(idx, chosenIndex){
+  var round = ROUNDS[idx];
+  var optsEl = document.getElementById('opts-'+idx);
+  var buttons = optsEl.querySelectorAll('.opt');
+  var isCorrect = chosenIndex === round.correct;
+
+  buttons.forEach(function(btn, i){
+    btn.disabled = true;
+    if(i === round.correct) btn.classList.add('correct');
+    if(i === chosenIndex && !isCorrect) btn.classList.add('wrong');
+  });
+
+  state.answers[idx] = {correct:isCorrect};
+
+  var factEl = document.getElementById('fact-'+idx);
+  factEl.innerHTML = round.fact;
+  factEl.classList.add('show');
+
+  var nextBtn = document.getElementById('next-'+idx);
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = (idx === ROUNDS.length - 1) ? 'Ver resultado ›' : 'Siguiente ›';
+  nextBtn.onclick = function(){
+    if(idx === ROUNDS.length - 1){
+      finishGame();
+    } else {
+      state.index = idx + 1;
+      showRound(state.index);
+    }
+  };
+
+  renderRack();
+}
+
+/* ============ START / END ============ */
+
+document.getElementById('startBtn').addEventListener('click', function(){
+  introScreen.style.display = 'none';
+  roundsPanel.style.display = 'block';
+  state.index = 0;
+  showRound(0);
+});
+
+function finishGame(){
+  roundsPanel.style.display = 'none';
+  endScreen.classList.add('active');
+
+  var correctCount = state.answers.filter(function(a){return a.correct;}).length;
+  document.getElementById('finalScore').textContent = correctCount + ' / ' + ROUNDS.length;
+
+  var tier;
+  if(correctCount === 8) tier = {latin:'OPTIMVS ARCHITECTVS', title:'¡Arquitecto imperial! Conoces Roma a la perfección.', coinColor:'gold'};
+  else if(correctCount >= 6) tier = {latin:'CIVIS DOCTVS', title:'Un ciudadano muy bien formado. Solo te falta pulir algún detalle.', coinColor:'gold'};
+  else if(correctCount >= 4) tier = {latin:'DISCIPVLVS DILIGENS', title:'Vas por buen camino: repasa las construcciones que fallaste.', coinColor:'bronze'};
+  else tier = {latin:'TIRO', title:'Un buen aprendiz siempre empieza así. ¡Repasa y vuelve a intentarlo!', coinColor:'bronze'};
+
+  document.getElementById('gradeLatin').textContent = tier.latin;
+  document.getElementById('gradeTitle').textContent = tier.title;
+
+  var gradeSVG = tier.coinColor === 'gold'
+    ? coinBase('<g><circle cx="100" cy="100" r="30" fill="none" stroke="#8B3A20" stroke-width="4"/><path d="M85 100 l10 12 22 -26" stroke="#8B3A20" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>')
+    : coinBase('<g><circle cx="100" cy="100" r="30" fill="none" stroke="#8B3A20" stroke-width="4"/><path d="M85 88 v24 M115 88 v24" stroke="#8B3A20" stroke-width="7" stroke-linecap="round"/></g>');
+  document.getElementById('gradeCoin').innerHTML = gradeSVG;
+
+  var reviewEl = document.getElementById('reviewList');
+  reviewEl.innerHTML = '';
+  ROUNDS.forEach(function(r, i){
+    var a = state.answers[i];
+    var row = document.createElement('div');
+    row.className = 'review-item ' + (a.correct ? 'ok' : 'bad');
+    var label = r.key.charAt(0).toUpperCase() + r.key.slice(1);
+    row.innerHTML = '<span class="mark">'+(a.correct ? '✓' : '✕')+'</span><span><b>'+label+'</b> — '+(a.correct ? 'respuesta correcta' : 'a repasar')+'</span>';
+    reviewEl.appendChild(row);
+  });
+}
+
+document.getElementById('retryBtn').addEventListener('click', function(){
+  state.index = 0;
+  state.answers = [];
+  endScreen.classList.remove('active');
+  introScreen.style.display = 'block';
+  document.querySelectorAll('.round').forEach(function(el){
+    el.classList.remove('active');
+  });
+  document.querySelectorAll('.opt').forEach(function(b){
+    b.disabled = false;
+    b.classList.remove('correct','wrong');
+  });
+  document.querySelectorAll('.fact').forEach(function(f){ f.classList.remove('show'); });
+  document.querySelectorAll('[id^="next-"]').forEach(function(b){ b.style.display='none'; });
+  renderRack();
+});
+
+renderRack();
+
+})();
+</script>
+</body>
+</html>
